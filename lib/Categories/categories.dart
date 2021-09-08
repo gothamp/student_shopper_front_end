@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import '../Widgets/circleIcon.dart';
-import 'specificCategoryPage.dart';
+import '../pages/categoryItemPage.dart';
 
 // ToDo -- rewrite this to pull categories from the database using rest api
 class Categories extends StatelessWidget {
@@ -18,7 +18,7 @@ class Categories extends StatelessWidget {
             children: [
               InkWell(
                 onTap: () => Navigator.of(context).push(new MaterialPageRoute(
-                    builder: (context) => SpecificCategoryPage(1))),
+                    builder: (context) => CategoryItemPage(1))),
               child: CircleIcon(
                 Colors.green,
                 Icon(
@@ -37,7 +37,7 @@ class Categories extends StatelessWidget {
             children: [
               InkWell(
                 onTap: () => Navigator.of(context).push(new MaterialPageRoute(
-                    builder: (context) => SpecificCategoryPage(2))),
+                    builder: (context) => CategoryItemPage(2))),
                 child: CircleIcon(
                   Colors.purple,
                   Icon(
@@ -57,7 +57,7 @@ class Categories extends StatelessWidget {
             children: [
               InkWell(
                 onTap: () => Navigator.of(context).push(new MaterialPageRoute(
-                    builder: (context) => SpecificCategoryPage(3))),
+                    builder: (context) => CategoryItemPage(3))),
                 child: CircleIcon(
                   Colors.yellow,
                   Icon(
@@ -78,7 +78,7 @@ class Categories extends StatelessWidget {
             children: [
               InkWell(
                 onTap: () => Navigator.of(context).push(new MaterialPageRoute(
-                    builder: (context) => SpecificCategoryPage(4))),
+                    builder: (context) => CategoryItemPage(4))),
                 child: CircleIcon(
                   Colors.red,
                   Icon(

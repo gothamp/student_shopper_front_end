@@ -22,11 +22,10 @@ class ItemRest{
   @JsonKey(ignore : true)
   List<Uint8List> imageDataList = [];
 
-
   ItemRest(Item item, List<int> itemImageList) : item = item {
-  //  this.item = item;
     this.itemImageList = itemImageList;
   }
+
   factory ItemRest.fromJson(Map<String, dynamic> parsedJson) => _$ItemRestFromJson(parsedJson);
   Map<String, dynamic> toJson() => _$ItemRestToJson(this);
 
@@ -34,15 +33,17 @@ class ItemRest{
 
 @JsonSerializable()
 class Item {
+  @JsonKey (includeIfNull: false )
+  int ?categoryId = null;
   int id = 0;
   String name = "";
  // String imageURL = "";
   String description = "";
   num price = 0;
 
-  Item(int id,  String name, num price, String description){
+  Item(int id,  String name, num price, String description, {int ?categoryId : null}){
     this.id = id;
-  //  this.categoryId = categoryId;
+    this.categoryId = categoryId;
     this.name = name;
     this.price = price;
  //   this.imageURL = imageURL;

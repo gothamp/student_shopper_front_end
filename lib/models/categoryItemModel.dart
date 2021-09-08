@@ -19,9 +19,9 @@ class CategoryItemModel extends ChangeNotifier {
   /// Internal, private state of the cart. Stores the ids of each item.
   int categoryId = 0;
   List<ItemRest> categoryItems = [];
-
   /// List of items in the cart.
   List<ItemRest> get items => categoryItems;
+  //Add categoryItem
 
 
 
@@ -32,11 +32,31 @@ class CategoryItemModel extends ChangeNotifier {
 
 // Todo -- Move below to service class
 
-  Future<void> init() async {
+  Future<void> _getItems() async {
     categoryItems.clear();
     await getItemRestList();
-    await add1stImageToItemIfAvailable();
+    await get1stImageForItemIfAvailable();
     notifyListeners();
+  }
+
+  Future<void> _postItem(Item itm) async {
+    await _postItemSingle(itm);
+    notifyListeners();
+  }
+
+
+  Future<void> _postItemSingle(Item itm) async {
+    var url = Uri.parse(CATEGORY_ITEMS_URL +
+        '${categoryId}/items'); // TODO -  call the recentItem service when it is built
+    http.Response response = await http.post(url
+        , headers: {"Accept": "application/json"}
+        , body: itm.toJson()
+    );
+    if (response.statusCode == 200) {
+
+    } else {
+      print(response.statusCode);
+    }
   }
 
   Future<void> getItemRestList() async {
@@ -63,7 +83,7 @@ class CategoryItemModel extends ChangeNotifier {
     }
   }
 
-  Future<void> add1stImageToItemIfAvailable() async {
+  Future<void> get1stImageForItemIfAvailable() async {
     if (categoryItems.isEmpty) return;
 
     Uint8List data = new Uint8List(0) ;
@@ -86,11 +106,19 @@ class CategoryItemModel extends ChangeNotifier {
       categoryItems[i].imageDataList.add(data);
     }
   }
-  void setCategoryId (int categoryId) {
+  void getCategoryItems (int categoryId) {
     this.categoryId = categoryId;
-    var initFuture = init();
+    var initFuture = _getItems();
     initFuture.then((voidValue) {
-      // state = HomeScreenModelState.initialized;
+//      notifyListeners();
+    });
+  }
+
+
+  void addCategoryItems (int categoryId, Item itm) {
+    this.categoryId = categoryId;
+    var initFuture = _postItem(itm);
+    initFuture.then((voidValue) {
 //      notifyListeners();
     });
   }

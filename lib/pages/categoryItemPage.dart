@@ -4,49 +4,26 @@ import 'package:http/http.dart' as http;
 import 'package:student_shopping_v1/models/categoryItemModel.dart';
 import 'dart:async';
 import 'dart:convert';
-import '../pages/itemDetailPage.dart';
+import 'itemDetailPage.dart';
 
 const String BASE_URI = 'http://localhost:8080/';
 
 const String ITEMS_IMAGES_URL = '${BASE_URI}itemImages/';  // append id of image to fetch
 
-class SpecificCategoryPage extends StatefulWidget {
+class CategoryItemPage extends StatefulWidget {
   final int categoryId;
-  SpecificCategoryPage(this.categoryId);
+  CategoryItemPage(this.categoryId);
 
   @override
-  _SpecificCategoryPageState createState() => _SpecificCategoryPageState();
+  _CategoryItemPageState createState() => _CategoryItemPageState();
 }
 
-class _SpecificCategoryPageState extends State<SpecificCategoryPage> {
+class _CategoryItemPageState extends State<CategoryItemPage> {
 
-  // List data = [];
-  //
-  // Future<String> getData() async {
-  //   // const String CATEGORY_ITEMS_URL = '${BASE_URI}categories/${widget.categoryId}/items';
-  //   var url = Uri.parse('${BASE_URI}categories/${widget.categoryId}/items');
-  //   http.Response response = await http.get(url, headers: {"Accept": "application/json"});
-  //   if (response.statusCode == 200) {
-  //     data = jsonDecode(response.body) as List;
-  //     print(data);
-  //   } else {
-  //     print (response.statusCode);
-  //   }
-  //
-  //   this.setState(() {
-  //   });
-  //
-  //   throw 'TODO';
-  // }
-  //
-  // @override
-  // void initState() {
-  //   this.getData();
-  // }
   @override
   void initState() {
     super.initState();
-    final categoryItemMdl = Provider.of<CategoryItemModel>(context, listen: false).setCategoryId(widget.categoryId);
+    final categoryItemMdl = Provider.of<CategoryItemModel>(context, listen: false).getCategoryItems(widget.categoryId);
   }
   @override
   Widget build(BuildContext context) {

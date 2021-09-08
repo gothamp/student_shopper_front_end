@@ -13,14 +13,17 @@ class addListing extends StatefulWidget {
 }
 
 class _addListingState extends State<addListing> {
+
+
+
   GlobalKey<FormState> _formKey = GlobalKey<FormState>();
-  TextEditingController productNameController = TextEditingController();
-  TextEditingController productDescriptionController = TextEditingController();
+  TextEditingController itemNameController = TextEditingController();
+  TextEditingController itemDescriptionController = TextEditingController();
   TextEditingController productPriceController = TextEditingController();
 
   String _value = "1";
   int newItemId = 0;
-  late String imageUrl;
+  //late String imageUrl;
   late Future<File> imageFile;
   File? _image1;
   File? _image2;
@@ -29,6 +32,30 @@ class _addListingState extends State<addListing> {
   String userEmail = "";
   late Map data;
   late File file;
+
+  // ImagePicker _imagePicker = new ImagePicker();
+  //
+  // _imgFromCamera() async {
+  //   XFile? image = await _imagePicker.pickImage(
+  //       source: ImageSource.camera, imageQuality: 50
+  //   );
+  //
+  //   setState(() {
+  //     _image = image;
+  //   });
+  // }
+  //
+  // _imgFromGallery() async {
+  //   XFile image = await  _imagePicker.pickImage(
+  //       source: ImageSource.gallery, imageQuality: 50
+  //   );
+  //
+  //   setState(() {
+  //     _image = image;
+  //   });
+  // }
+
+
 
   Future getImage(int type) async {
     PickedFile pickedImage = (await ImagePicker().getImage(
@@ -106,13 +133,13 @@ class _addListingState extends State<addListing> {
                 Expanded(
                   child: Padding(
                     padding: const EdgeInsets.all(8.0),
-                    child: OutlineButton(
-                        borderSide: BorderSide(
-                            color: Colors.grey.withOpacity(0.5), width: 2.5),
-                        onPressed: () {
+                    child: OutlinedButton(
+                        style: OutlinedButton.styleFrom(primary: Colors.grey.withOpacity(0.5),
+                          side: BorderSide(color: Colors.red, width: 5),),
+                        onPressed: () async {
                           _selectImage(
                               ImagePicker()
-                                  .getImage(source: ImageSource.gallery),
+                                  .pickImage(source: ImageSource.gallery),
                               1);
                           // _showChoiceDialog(context);
                         },
@@ -122,9 +149,9 @@ class _addListingState extends State<addListing> {
                 Expanded(
                   child: Padding(
                     padding: const EdgeInsets.all(8.0),
-                    child: OutlineButton(
-                        borderSide: BorderSide(
-                            color: Colors.grey.withOpacity(0.5), width: 2.5),
+                    child: OutlinedButton(
+                        style: OutlinedButton.styleFrom(primary: Colors.grey.withOpacity(0.5),
+                          side: BorderSide(color: Colors.red, width: 5),),
                         onPressed: () async {
                           // _showChoiceDialog(context);
                           // setState(() {
@@ -137,7 +164,7 @@ class _addListingState extends State<addListing> {
                           // _selectImage(imageFile, 2);
                           _selectImage(
                               ImagePicker()
-                                  .getImage(source: ImageSource.gallery),
+                                  .pickImage(source: ImageSource.gallery),
                               2);
                         },
                         child: _displayChild2()),
@@ -146,9 +173,9 @@ class _addListingState extends State<addListing> {
                 Expanded(
                   child: Padding(
                     padding: const EdgeInsets.all(8.0),
-                    child: OutlineButton(
-                        borderSide: BorderSide(
-                            color: Colors.grey.withOpacity(0.5), width: 2.5),
+                    child: OutlinedButton(
+                        style: OutlinedButton.styleFrom(primary: Colors.grey.withOpacity(0.5),
+                          side: BorderSide(color: Colors.red, width: 5),),
                         onPressed: () async {
                           // final tmpFile = await getImage(0);
                           // setState(() {
@@ -157,7 +184,7 @@ class _addListingState extends State<addListing> {
                           // _selectImage(imageFile, 3);
                           _selectImage(
                               ImagePicker()
-                                  .getImage(source: ImageSource.gallery),
+                                  .pickImage(source: ImageSource.gallery),
                               3);
                         },
                         child: _displayChild3()),
@@ -173,16 +200,18 @@ class _addListingState extends State<addListing> {
             Padding(
               padding: const EdgeInsets.all(12.0),
               child: TextFormField(
-                controller: productNameController,
+                controller: itemNameController,
                 decoration: InputDecoration(
-                  hintText: 'Product Name',
+                  hintText: 'Item Name',
                 ),
               ),
             ),
             Padding(
               padding: const EdgeInsets.all(12.0),
               child: TextFormField(
-                controller: productDescriptionController,
+                keyboardType: TextInputType.multiline,
+                maxLines: 3,
+                controller: itemDescriptionController,
                 // initialValue: '1',
                 decoration: InputDecoration(
                   hintText: 'Description',
@@ -194,10 +223,22 @@ class _addListingState extends State<addListing> {
               child: TextFormField(
                 // initialValue: '0.00',
                 controller: productPriceController,
-                keyboardType: TextInputType.number,
-                inputFormatters: <TextInputFormatter>[
-                  FilteringTextInputFormatter.digitsOnly
+                inputFormatters: [
+                  FilteringTextInputFormatter.allow(RegExp(r"[0-9.]")),
+                  TextInputFormatter.withFunction((oldValue, newValue) {
+                    try {
+                      final text = newValue.text;
+                      if (text.isNotEmpty) double.parse(text);
+                      return newValue;
+                    } catch (e) {}
+                    return oldValue;
+                  }),
                 ],
+                keyboardType: TextInputType.numberWithOptions(
+                  decimal: true,
+                  signed: false,
+                ),
+
                 decoration: InputDecoration(
                   hintText: 'Price',
                 ),
@@ -234,24 +275,24 @@ class _addListingState extends State<addListing> {
               ),
               child: Text('Add Product'),
               onPressed: () {
-                addNewItemToDB(
-                    productNameController.text,
-                    productDescriptionController.text,
+                Future <http.Response> resp =  addNewItemToDB(
+                    itemNameController.text,
+                    itemDescriptionController.text,
                     productPriceController.text,
                     _value);
 
                 // newItemId =
 
-                if(_image1 != null){
-                  uploadItemImageToDB(_image1!, 1);
-                }
-                if(_image2 != null){
-                  uploadItemImageToDB(_image2!, 1);
-
-                }
-                if(_image3 != null){
-                  uploadItemImageToDB(_image3!, 1);
-                }
+                // if(_image1 != null){
+                //   uploadItemImageToDB(_image1!, 1);
+                // }
+                // if(_image2 != null){
+                //   uploadItemImageToDB(_image2!, 1);
+                //
+                // }
+                // if(_image3 != null){
+                //   uploadItemImageToDB(_image3!, 1);
+                // }
               },
 
             )
@@ -259,8 +300,8 @@ class _addListingState extends State<addListing> {
         ));
   }
 
-  void _selectImage(Future<PickedFile?> pickImage, int imageNumber) async {
-    PickedFile? tempImg1 = await pickImage;
+  void _selectImage(Future<XFile?> pickImage, int imageNumber) async {
+    XFile? tempImg1 = await pickImage;
     File tempImg = File(tempImg1!.path);
     switch (imageNumber) {
       case 1:
@@ -335,9 +376,9 @@ class _addListingState extends State<addListing> {
     }
   }
 
-  Future<http.Response> addNewItemToDB(
+  Future<http.Response>  addNewItemToDB(
       String name, String description, String price, String categoryId) {
-    return http.post(
+    return  http.post(
       Uri.parse('http://localhost:8080/categories/$categoryId/items'),
       headers: <String, String>{
         'Content-Type': 'application/json; charset=UTF-8',
@@ -345,7 +386,7 @@ class _addListingState extends State<addListing> {
       body: jsonEncode({
         'name': name,
         'description': description,
-        'price': int.parse(price),
+        'price': num.parse(price),
       }),
     );
   }

@@ -36,12 +36,23 @@ Item _$ItemFromJson(Map<String, dynamic> json) {
     json['name'] as String,
     json['price'] as num,
     json['description'] as String,
+    categoryId: json['categoryId'] as int?,
   );
 }
 
-Map<String, dynamic> _$ItemToJson(Item instance) => <String, dynamic>{
-      'id': instance.id,
-      'name': instance.name,
-      'description': instance.description,
-      'price': instance.price,
-    };
+Map<String, dynamic> _$ItemToJson(Item instance) {
+  final val = <String, dynamic>{};
+
+  void writeNotNull(String key, dynamic value) {
+    if (value != null) {
+      val[key] = value;
+    }
+  }
+
+  writeNotNull('categoryId', instance.categoryId);
+  val['id'] = instance.id;
+  val['name'] = instance.name;
+  val['description'] = instance.description;
+  val['price'] = instance.price;
+  return val;
+}
