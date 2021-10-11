@@ -58,10 +58,10 @@ class RecentItemModel extends ChangeNotifier {
       for (int i = 0; i < items.length; i++) {
         ItemRest itm = ItemRest.fromJson(items[i]);
         _recentItems.add(itm);
-        for (int imgId in itm.itemImageList) {
-          var url = Uri.parse(
-              'http://localhost:8080/categories/1/items'); // TODO -  call the recentItem service when it is built
-        }
+        // for (int imgId in itm.itemImageList) {
+        //   var url = Uri.parse(
+        //       'http://localhost:8080/categories/1/items'); // TODO -  call the recentItem service when it is built
+        // }
       }
       print(_recentItems);
     } else {

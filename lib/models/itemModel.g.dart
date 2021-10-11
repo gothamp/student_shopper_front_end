@@ -32,11 +32,11 @@ Map<String, dynamic> _$ItemRestToJson(ItemRest instance) => <String, dynamic>{
 
 Item _$ItemFromJson(Map<String, dynamic> json) {
   return Item(
-    json['id'] as int,
+    json['category_id'] as int,
     json['name'] as String,
     json['price'] as num,
     json['description'] as String,
-    categoryId: json['categoryId'] as int?,
+    id: json['id'] as int?,
   );
 }
 
@@ -49,8 +49,8 @@ Map<String, dynamic> _$ItemToJson(Item instance) {
     }
   }
 
-  writeNotNull('categoryId', instance.categoryId);
-  val['id'] = instance.id;
+  writeNotNull('category_id', toNull(instance.category_id));
+  writeNotNull('id', instance.id);
   val['name'] = instance.name;
   val['description'] = instance.description;
   val['price'] = instance.price;

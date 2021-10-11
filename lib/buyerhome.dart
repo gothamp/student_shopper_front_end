@@ -17,7 +17,7 @@ class _HomePageState extends State<BuyerHomePage> {
   final List<Widget> tabs = [
     homePageTab(),
     favoritePageTab(),
-    addListing(),
+    AddListing(),
     // ChatScreen(),
     sellerShopTab(),
   ];

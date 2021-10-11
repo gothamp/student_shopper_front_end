@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:json_annotation/json_annotation.dart';
 import 'dart:typed_data';
 part 'itemModel.g.dart';
+
 @JsonSerializable()
 class ItemPage{
   List<Item>itemList = [];
@@ -31,19 +32,22 @@ class ItemRest{
 
 }
 
+toNull(_) => null;
+
 @JsonSerializable()
 class Item {
+  @JsonKey(toJson: toNull, includeIfNull: false)
+  int ?category_id = 0;
   @JsonKey (includeIfNull: false )
-  int ?categoryId = null;
-  int id = 0;
+  int ?id ;
   String name = "";
  // String imageURL = "";
   String description = "";
   num price = 0;
 
-  Item(int id,  String name, num price, String description, {int ?categoryId : null}){
+  Item(int category_id,  String name, num price, String description, {int ?id : null}){
     this.id = id;
-    this.categoryId = categoryId;
+    this.category_id = category_id;
     this.name = name;
     this.price = price;
  //   this.imageURL = imageURL;

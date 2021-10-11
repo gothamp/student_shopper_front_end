@@ -1,18 +1,22 @@
 import 'dart:convert';
 import 'dart:io';
+import 'package:provider/provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:http/http.dart' as http;
 import 'package:path/path.dart';
+import 'package:student_shopping_v1/models/categoryItemModel.dart';
 
-class addListing extends StatefulWidget {
+import 'models/itemModel.dart';
+
+class AddListing extends StatefulWidget {
   @override
-  _addListingState createState() => _addListingState();
+  _AddListingState createState() => _AddListingState();
 }
 
-class _addListingState extends State<addListing> {
+class _AddListingState extends State<AddListing> {
 
 
 
@@ -112,6 +116,8 @@ class _addListingState extends State<addListing> {
 
   @override
   Widget build(BuildContext context) {
+
+ //   var recentList = context.watch<CategoryItemModel>();
     return Scaffold(
         appBar: new AppBar(
           automaticallyImplyLeading: false,
@@ -153,15 +159,6 @@ class _addListingState extends State<addListing> {
                         style: OutlinedButton.styleFrom(primary: Colors.grey.withOpacity(0.5),
                           side: BorderSide(color: Colors.red, width: 5),),
                         onPressed: () async {
-                          // _showChoiceDialog(context);
-                          // setState(() {
-                          //   _image1 = imageFile;
-                          // });
-                          // final tmpFile = await getImage(0);
-                          // setState(() {
-                          //   imageFile = tmpFile;
-                          // });
-                          // _selectImage(imageFile, 2);
                           _selectImage(
                               ImagePicker()
                                   .pickImage(source: ImageSource.gallery),
@@ -177,11 +174,6 @@ class _addListingState extends State<addListing> {
                         style: OutlinedButton.styleFrom(primary: Colors.grey.withOpacity(0.5),
                           side: BorderSide(color: Colors.red, width: 5),),
                         onPressed: () async {
-                          // final tmpFile = await getImage(0);
-                          // setState(() {
-                          //   imageFile = tmpFile;
-                          // });
-                          // _selectImage(imageFile, 3);
                           _selectImage(
                               ImagePicker()
                                   .pickImage(source: ImageSource.gallery),
@@ -275,24 +267,24 @@ class _addListingState extends State<addListing> {
               ),
               child: Text('Add Product'),
               onPressed: () {
-                Future <http.Response> resp =  addNewItemToDB(
+                var  itemId  =  addNewItemToDB(
+                  context,
                     itemNameController.text,
                     itemDescriptionController.text,
-                    productPriceController.text,
+                    productPriceController.text,  
                     _value);
+                if (itemId != null) {
+                  if (_image1 != null)
+                    uploadItemImageToDB(_image1!, itemId.toInt());
 
-                // newItemId =
+                  if (_image2 != null) {
+                    uploadItemImageToDB(_image2!, itemId.toInt());
+                  }
 
-                // if(_image1 != null){
-                //   uploadItemImageToDB(_image1!, 1);
-                // }
-                // if(_image2 != null){
-                //   uploadItemImageToDB(_image2!, 1);
-                //
-                // }
-                // if(_image3 != null){
-                //   uploadItemImageToDB(_image3!, 1);
-                // }
+                  if(_image3 != null){
+                    uploadItemImageToDB(_image3!, 1);
+                  }
+                }
               },
 
             )
@@ -376,19 +368,28 @@ class _addListingState extends State<addListing> {
     }
   }
 
-  Future<http.Response>  addNewItemToDB(
-      String name, String description, String price, String categoryId) {
-    return  http.post(
-      Uri.parse('http://localhost:8080/categories/$categoryId/items'),
-      headers: <String, String>{
-        'Content-Type': 'application/json; charset=UTF-8',
-      },
-      body: jsonEncode({
-        'name': name,
-        'description': description,
-        'price': num.parse(price),
-      }),
-    );
+  int?  addNewItemToDB   (
+      BuildContext context
+      , String name
+      , String description
+      , String price
+      , String categoryId)   {
+
+    var item =  Item(int.parse(categoryId), name, num.parse(price), description);
+    var itemId =  Provider.of<CategoryItemModel>(context, listen: false)
+            .addCategoryItem(int.parse(categoryId), item);
+    return itemId;
+    // return  http.post(
+    //   Uri.parse('http://localhost:8080/categories/$categoryId/items'),
+    //   headers: <String, String>{
+    //     'Content-Type': 'application/json; charset=UTF-8',
+    //   },
+    //   body: jsonEncode({
+    //     'name': name,
+    //     'description': description,
+    //     'price': num.parse(price),
+    //   }),
+    // );
   }
 
   uploadItemImageToDB(File imageFile, int itemId) async {

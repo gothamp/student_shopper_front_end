@@ -39,42 +39,50 @@ class CategoryItemModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> _postItem(Item itm) async {
-    await _postItemSingle(itm);
-    notifyListeners();
+  Future<int?> _postItem(Item itm) async {
+    int? itmId = await _postItemSingle(itm);
+    //notifyListeners();
+    return itmId;
   }
 
 
-  Future<void> _postItemSingle(Item itm) async {
+  Future<int?> _postItemSingle(Item itm) async {
+    Map<String, dynamic> data;
+
     var url = Uri.parse(CATEGORY_ITEMS_URL +
         '${categoryId}/items'); // TODO -  call the recentItem service when it is built
+    var tmpObj =  json.encode(itm.toJson());
     http.Response response = await http.post(url
-        , headers: {"Accept": "application/json"}
-        , body: itm.toJson()
-    );
+        , headers: {"Content-Type": "application/json"}
+        , body: tmpObj);
     if (response.statusCode == 200) {
-
+      data = jsonDecode(response.body);
+  //    var item = data['content'];
+      var id = data['id'];
+      return id;
+  //    Item itm = Item.fromJson(item);
     } else {
       print(response.statusCode);
     }
+
   }
 
   Future<void> getItemRestList() async {
     Map<String, dynamic> data;
+
     var url = Uri.parse(CATEGORY_ITEMS_URL+'${categoryId}/items'); // TODO -  call the recentItem service when it is built
     http.Response response = await http.get(
         url, headers: {"Accept": "application/json"});
     if (response.statusCode == 200) {
-      // data.map<Item>((json) => Item.fromJson(json)).toList();
       data = jsonDecode(response.body);
       var items = data['content'];
       for (int i = 0; i < items.length; i++) {
         ItemRest itm = ItemRest.fromJson(items[i]);
         categoryItems.add(itm);
-        for (int imgId in itm.itemImageList) {
-          var url = Uri.parse(
-              'http://localhost:8080/categories/1/items'); // TODO -  call the recentItem service when it is built
-        }
+        // for (int imgId in itm.itemImageList) {
+        //   var url = Uri.parse(
+        //       'http://localhost:8080/categories/1/items'); // TODO -  call the recentItem service when it is built
+        // }
       }
  //     notifyListeners();
       print(categoryItems);
@@ -115,12 +123,9 @@ class CategoryItemModel extends ChangeNotifier {
   }
 
 
-  void addCategoryItems (int categoryId, Item itm) {
+  int? addCategoryItem (int categoryId, Item itm)    {
     this.categoryId = categoryId;
-    var initFuture = _postItem(itm);
-    initFuture.then((voidValue) {
-//      notifyListeners();
-    });
+    var itmId =  _postItem(itm).then((value) {  return value?.toInt();}) ;
   }
 
   CategoryItemModel() {
