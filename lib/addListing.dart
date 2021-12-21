@@ -6,7 +6,7 @@ import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:http/http.dart' as http;
-import 'package:path/path.dart';
+
 import 'package:student_shopping_v1/models/categoryItemModel.dart';
 
 import 'models/itemModel.dart';
@@ -267,24 +267,16 @@ class _AddListingState extends State<AddListing> {
               ),
               child: Text('Add Product'),
               onPressed: () {
-                var  itemId  =  addNewItemToDB(
+                addNewItemToDB(
                   context,
                     itemNameController.text,
                     itemDescriptionController.text,
                     productPriceController.text,  
-                    _value);
-                if (itemId != null) {
-                  if (_image1 != null)
-                    uploadItemImageToDB(_image1!, itemId.toInt());
+                    _value, // _value = categoryid
+                    _image1,
+                    _image2,
+                    _image3);
 
-                  if (_image2 != null) {
-                    uploadItemImageToDB(_image2!, itemId.toInt());
-                  }
-
-                  if(_image3 != null){
-                    uploadItemImageToDB(_image3!, 1);
-                  }
-                }
               },
 
             )
@@ -368,17 +360,35 @@ class _AddListingState extends State<AddListing> {
     }
   }
 
-  int?  addNewItemToDB   (
+  void  addNewItemToDB   (
       BuildContext context
       , String name
       , String description
       , String price
-      , String categoryId)   {
+      , String categoryId
+      , File? image1
+      , File? image2
+      , File? image3)   {
 
     var item =  Item(int.parse(categoryId), name, num.parse(price), description);
-    var itemId =  Provider.of<CategoryItemModel>(context, listen: false)
-            .addCategoryItem(int.parse(categoryId), item);
-    return itemId;
+    List<File> imageDataList = [];
+
+      if (_image1 != null)
+        imageDataList.add(_image1!);
+    //    uploadItemImageToDB(_image1!, itemId);
+
+      if (_image2 != null) {
+        imageDataList.add(_image2!);
+ //       uploadItemImageToDB(_image2!, itemId);
+      }
+
+      if(_image3 != null){
+        imageDataList.add(_image3!);
+ //       uploadItemImageToDB(_image3!, itemId);
+      }
+      Provider.of<CategoryItemModel>(context, listen: false)
+          .addCategoryItem(int.parse(categoryId), item, imageDataList);
+
     // return  http.post(
     //   Uri.parse('http://localhost:8080/categories/$categoryId/items'),
     //   headers: <String, String>{
@@ -392,24 +402,7 @@ class _AddListingState extends State<AddListing> {
     // );
   }
 
-  uploadItemImageToDB(File imageFile, int itemId) async {
-    var stream  = new http.ByteStream(imageFile.openRead()); stream.cast();
-    var length = await imageFile.length();
 
-    var uri = Uri.parse('http://localhost:8080/items/$itemId/itemImages');
-
-    var request = new http.MultipartRequest("POST", uri);
-    var multipartFile = new http.MultipartFile('itemImage', stream, length,
-        filename: basename(imageFile.path));
-    //contentType: new MediaType('image', 'png'));
-
-    request.files.add(multipartFile);
-    var response = await request.send();
-    print(response.statusCode);
-    response.stream.transform(utf8.decoder).listen((value) {
-      print(value);
-    });
-  }
 
   getNewlyUploadedItemIdFromDB(String name, String description, String price, String categoryId){
 

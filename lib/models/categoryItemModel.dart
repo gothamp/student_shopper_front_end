@@ -1,5 +1,7 @@
+//import 'dart:html';
+import 'dart:io';
 import 'dart:typed_data';
-
+import 'package:path/path.dart';
 import 'package:flutter/foundation.dart';
 import '../models/itemModel.dart';
 import 'package:http/http.dart' as http;
@@ -39,32 +41,48 @@ class CategoryItemModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<int?> _postItem(Item itm) async {
-    int? itmId = await _postItemSingle(itm);
+  Future <Item?> postItem(Item itm) async  {
+      itm = await postItemSingle(itm) //;
+   //   notifyListeners();
+     // return itm;
+       .then((value)  {
+         itm = value;
+         return itm;
+       }) ;
+       //   .then((retItm) {
+       // itm = retItm!;
+
+
+  //});
     //notifyListeners();
-    return itmId;
+    //return itmId;
   }
 
 
-  Future<int?> _postItemSingle(Item itm) async {
+  Future<Item> postItemSingle(Item itm)  async {
     Map<String, dynamic> data;
 
     var url = Uri.parse(CATEGORY_ITEMS_URL +
         '${categoryId}/items'); // TODO -  call the recentItem service when it is built
     var tmpObj =  json.encode(itm.toJson());
-    http.Response response = await http.post(url
-        , headers: {"Content-Type": "application/json"}
-        , body: tmpObj);
-    if (response.statusCode == 200) {
-      data = jsonDecode(response.body);
-  //    var item = data['content'];
-      var id = data['id'];
-      return id;
-  //    Item itm = Item.fromJson(item);
-    } else {
-      print(response.statusCode);
-    }
+    final http.Response response =  await http.post(url
+        , headers: {
+          "Accept": "application/json",
+          "Content-Type": "application/json"
+        }
+        , body: tmpObj
+        );
 
+  //  .then((response) {
+      if (response.statusCode == 200) {
+        data = jsonDecode(response.body);
+        itm.id = data['id'];
+     //   return itm;
+      } else {
+        print(response.statusCode);
+      }
+  //  });
+    return itm;
   }
 
   Future<void> getItemRestList() async {
@@ -123,9 +141,47 @@ class CategoryItemModel extends ChangeNotifier {
   }
 
 
-  int? addCategoryItem (int categoryId, Item itm)    {
+  void uploadItemImageToDB(File imageFile, ItemRest itmRest) async {
+    var stream  = new http.ByteStream(imageFile.openRead()); stream.cast();
+    var length = await imageFile.length();
+    var itemId = itmRest.item.id!;
+    var uri = Uri.parse('http://localhost:8080/items/$itemId/itemImages');
+
+    var request = new http.MultipartRequest("POST", uri);
+    var multipartFile = new http.MultipartFile('file', stream, length,
+        filename: basename(imageFile.path));
+    //contentType: new MediaType('image', 'png'));
+
+    request.files.add(multipartFile);
+    var streamedResponse = await request.send();
+    var response = await http.Response.fromStream(streamedResponse);
+    if (response.statusCode == 200) {
+      print(response.statusCode);
+      var data = response.bodyBytes;
+      itmRest.imageDataList.add(data);
+      //response.transform(utf8.decoder).listen((value) {
+        print(data);
+      }
+  }
+
+  void addCategoryItem (int categoryId, Item itm, List<File> imageDataList) async {
     this.categoryId = categoryId;
-    var itmId =  _postItem(itm).then((value) {  return value?.toInt();}) ;
+
+    try {
+      postItem(itm)
+          .then((retItm) {
+             if (itm.id != null) {
+               ItemRest itmRest = new ItemRest(itm, new List.empty());
+               for (File img in imageDataList) { // Insert images
+                   uploadItemImageToDB(img, itmRest);
+               }
+               categoryItems.add(itmRest);
+             } } );
+      //   itm = retItm!;
+
+    } catch (e) {
+      print(e);
+    }
   }
 
   CategoryItemModel() {
@@ -146,6 +202,7 @@ class CategoryItemModel extends ChangeNotifier {
  //   notifyListeners();
   }
 }
+
 
 
 // Handle one Page of Items
